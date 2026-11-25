@@ -1,0 +1,8 @@
+import Navbar from '../components/Navbar'
+import Footer from '../components/Footer'
+import { getRegistrations, getUsers } from '../utils/storage'
+
+export default function ManageUsers(){
+ const users=getUsers().filter(u=>u.role==='user'), regs=getRegistrations()
+ return <><Navbar/><main className="container page-shell"><div className="page-intro"><div className="eyebrow"><span className="eyebrow-line"/> ADMIN / COMMUNITY</div><h1>Registered <span>participants.</span></h1><p>People who have joined the EVENTORA community and their activity.</p></div><div className="stats-grid two-stats"><div className="stat-card"><span className="stat-icon green"><i className="bi bi-people"/></span><div><small>COMMUNITY MEMBERS</small><strong>{users.length}</strong><span>Registered user accounts</span></div></div><div className="stat-card"><span className="stat-icon"><i className="bi bi-ticket-perforated"/></span><div><small>EVENT SIGN-UPS</small><strong>{regs.length}</strong><span>Total registrations</span></div></div></div><div className="panel-card participants-card"><div className="panel-heading"><div><h3>All participants</h3><p>User accounts and registration counts</p></div></div>{users.length?<div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>NAME</th><th>EMAIL</th><th>EVENTS JOINED</th><th>MEMBER SINCE</th></tr></thead><tbody>{users.map(u=><tr key={u.id}><td><strong>{u.name}</strong></td><td>{u.email}</td><td><span className="table-count">{regs.filter(r=>r.userId===u.id).length}</span></td><td>—</td></tr>)}</tbody></table></div>:<div className="table-empty">No participants have signed up yet.</div>}</div></main><Footer/></>
+}

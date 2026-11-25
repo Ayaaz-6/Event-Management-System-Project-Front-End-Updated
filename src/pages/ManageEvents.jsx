@@ -1,0 +1,15 @@
+import { useState } from 'react'
+import Navbar from '../components/Navbar'
+import Footer from '../components/Footer'
+import EventForm from '../components/EventForm'
+import { getEvents, getRegistrations, saveEvents, saveRegistrations } from '../utils/storage'
+
+export default function ManageEvents(){
+  const [events,setEvents]=useState(getEvents())
+  const [editing,setEditing]=useState(null)
+  const [showForm,setShowForm]=useState(false)
+  const [query,setQuery]=useState('')
+  function save(data){let updated;if(editing){updated=events.map(e=>e.id===editing.id?{...data,id:editing.id}:e)}else{updated=[{...data,id:`ev-${Date.now()}`},...events]}saveEvents(updated);setEvents(updated);setShowForm(false);setEditing(null)}
+  function remove(id){if(!window.confirm('Delete this event? Its registrations will also be removed.'))return;const updated=events.filter(e=>e.id!==id);saveEvents(updated);saveRegistrations(getRegistrations().filter(r=>r.eventId!==id));setEvents(updated)}
+  return <><Navbar/><main className="container page-shell"><div className="dashboard-welcome"><div><div className="eyebrow"><span className="eyebrow-line"/> ADMIN / EVENT CATALOGUE</div><h1>Manage <span>events.</span></h1><p>Create experiences, update details, and keep your catalogue fresh.</p></div><button className="btn btn-primary" onClick={()=>{setEditing(null);setShowForm(true)}}><i className="bi bi-plus-lg"/> Add new event</button></div>{showForm&&<div className="modal-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)setShowForm(false)}}><div className="modal-card"><div className="modal-heading"><div><div className="eyebrow">EVENT DETAILS</div><h2>{editing?'Edit event':'Create an event'}</h2></div><button className="icon-button" onClick={()=>setShowForm(false)}><i className="bi bi-x-lg"/></button></div><EventForm initial={editing} onSave={save} onCancel={()=>setShowForm(false)}/></div></div>}<div className="management-toolbar"><div className="search-box"><i className="bi bi-search"/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search your events..."/></div><span>{events.length} total events</span></div><div className="manage-event-list">{events.filter(e=>e.title.toLowerCase().includes(query.toLowerCase())).map(e=><div className="manage-event-row" key={e.id}><img src={e.image} alt=""/><div className="manage-event-info"><span className="category-text">{e.category}</span><strong>{e.title}</strong><small><i className="bi bi-calendar3"/> {e.date} · <i className="bi bi-geo-alt"/> {e.venue}</small></div><div className="manage-count"><strong>{getRegistrations().filter(r=>r.eventId===e.id).length}/{e.capacity}</strong><small>registered</small></div><div className="row-actions"><button className="icon-button" title="Edit event" onClick={()=>{setEditing(e);setShowForm(true)}}><i className="bi bi-pencil"/></button><button className="icon-button delete-button" title="Delete event" onClick={()=>remove(e.id)}><i className="bi bi-trash3"/></button></div></div>)}</div>{!events.length&&<div className="empty-state">No events yet. Create your first event.</div>}</main><Footer/></>
+}
